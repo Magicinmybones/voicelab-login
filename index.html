@@ -155,144 +155,189 @@ svg{display:block}
 .send:hover{transform:scale(1.04)}
 .send svg{width:calc(var(--u)*30);height:calc(var(--u)*30)}
 
-/* ==================================================================
-   RESPONSIVE LAYERS
-   Everything above this line is the desktop build and is never edited
-   here; the layers below only ever ADD overrides inside media queries
-   that cannot match a desktop viewport.
+/* Viewport architecture
+   Wide screens retain the reference composition above. Tablets keep both
+   panels in one viewport. Phones prioritize the login; the builder artwork
+   is decorative, so it is removed before it can displace the form. */
+.social-actions{width:100%}
 
-   Where the desktop architecture breaks (measured, not assumed):
-   the split is drawn at --u = min(vw/2048, vh/1389). The smallest scale
-   desktop already ships at is 0.553 (1366x768 laptop). Below a width of
-   1133px the width term drops under that floor and the first element to
-   fail is the chip label (~9px) followed by the form labels, so 1133px
-   is where desktop hands over. From there:
-
-   1. Tablet split   900-1132px, landscape, >=640px tall
-      Same side-by-side architecture, re-flowed: its own readable scale,
-      tighter vertical rhythm so it still fits one viewport, chips 2x2.
-   2. Stacked        everything else up to 1132px (portrait tablets,
-      short landscape phones). Two full-viewport sections, login first.
-   3. Mobile         <=665px, where the stacked scale would push text
-      under ~13px. Px-based type, 48-52px touch targets, 2x2 chip grid,
-      a composer whose toolbar wraps by content.
-   ================================================================== */
-
-/* ---- shared by every non-desktop layer ---- */
-@media (max-width: 1132px){
-  body{overflow:auto}
-  .screen{width:auto;min-height:0}
-  .eye{width:40px;height:40px;right:calc(var(--u)*18 - 10px)}
-  .eye svg{width:calc(var(--u)*19.5);height:calc(var(--u)*21)}
-  .input.pw input{padding-right:48px}
-  .input input{font-size:max(16px, calc(var(--u)*18.7))}
-  .input.pw input:not(.shown){font-size:calc(var(--u)*32)}
-}
-
-/* ---- 1. TABLET SPLIT: landscape tablets / small laptop windows ---- */
-@media (max-width: 1132px) and (min-width: 900px) and (orientation: landscape) and (min-height: 640px){
-  /* starts at exactly the desktop floor (0.553 at 1132px) and grows as the
-     columns get narrower, capped by what fits the column and the height */
-  :root{--u: max(0.553px, min((50vw - 80px) / 606, (100dvh - 120px) / 897, calc(0.553px + (1133px - 100vw) * 0.001), 0.8px))}
-  .screen{height:100dvh}
-  .left{display:flex;flex-direction:column;padding:28px clamp(28px, 4vw, 44px) 24px}
-  .brand{position:static}
-  .form-wrap{position:static;margin:auto;width:calc(var(--u)*606);max-width:100%;padding:20px 0}
-  .fields{margin-top:calc(var(--u)*56)}
-  .btn-primary{margin-top:calc(var(--u)*32)}
-  .divider{margin-top:calc(var(--u)*26)}
-  .btn-social.g{margin-top:calc(var(--u)*28)}
-  .signup{margin-top:calc(var(--u)*30)}
-  .foot{position:static}
-
-  .panel{left:50%;right:12px;top:12px;bottom:12px;border-radius:18px}
-  .panel-inner{bottom:calc(var(--u)*48)}
-  .ask{margin-right:0}
-  .chips{margin-right:0;flex-wrap:wrap;row-gap:calc(var(--u)*14);max-width:calc(var(--u)*400)}
-  .chip{height:max(calc(var(--u)*46), 34px)}
-  .prompt{width:min(calc(var(--u)*886), calc(100% - 56px))}
-}
-
-/* ---- 2. STACKED: portrait tablets and short landscape screens ---- */
-@media (max-width: 899px), (max-width: 1132px) and (orientation: portrait), (max-width: 1132px) and (max-height: 639px){
-  :root{--u: clamp(0.62px, (100vw - 64px) / 886, 0.8px)}
-  .screen{height:auto;display:flex;flex-direction:column}
-
-  .left{position:relative;inset:auto;min-height:100svh;display:flex;flex-direction:column;
-    padding:max(32px, env(safe-area-inset-top)) clamp(24px, 5vw, 48px) 28px}
-  .brand{position:static}
-  .form-wrap{position:static;margin:auto;width:calc(var(--u)*606);max-width:100%;padding:48px 0}
-  .foot{position:static}
-
-  .panel{position:relative;inset:auto;margin:0 12px 12px;min-height:calc(100svh - 12px);border-radius:20px;
-    display:flex;flex-direction:column;justify-content:flex-end;
-    padding:0 clamp(20px, 4vw, 32px) max(calc(var(--u)*63), env(safe-area-inset-bottom))}
-  .panel-inner{position:static}
-  .ask{margin-right:0}
-  .chips{margin-right:0;flex-wrap:wrap;row-gap:calc(var(--u)*14)}
-  .prompt{width:100%;max-width:calc(var(--u)*886)}
-}
-
-/* ---- 3. MOBILE ---- */
-@media (max-width: 665px){
-  :root{--u: clamp(0.62px, 100vw / 560, 0.74px);--gx: clamp(16px, 5.4vw, 28px)}
-
-  /* login */
-  .left{padding:max(20px, env(safe-area-inset-top)) var(--gx) max(20px, env(safe-area-inset-bottom))}
-  .brand{gap:10px}
+/* Compact desktop and tablet: the form and artwork share one viewport. */
+@media (min-width:700px) and (max-width:1600px), (min-width:700px) and (max-height:1000px){
+  :root{--u:.7px}
+  .screen{width:100%;height:100dvh;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);overflow:hidden}
+  .left{position:relative;inset:auto;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;padding:clamp(16px,2.6dvh,30px) clamp(18px,3vw,42px) clamp(16px,2.6dvh,28px)}
+  .brand{position:static;align-self:flex-start;gap:10px;flex:none}
   .brand-mark{width:34px;height:34px;border-radius:8px}
   .brand-mark svg{width:22px;height:22px}
-  .brand-name{font-size:22px;letter-spacing:-.1px}
-  .form-wrap{width:100%;max-width:440px;padding:36px 0}
-  .title{font-size:clamp(32px, 9.4vw, 42px);letter-spacing:-.02em}
-  .subtitle{margin:10px auto 0;font-size:15px;line-height:1.45;white-space:normal;text-wrap:balance}
-  .fields{margin-top:32px}
-  .field + .field{margin-top:18px}
-  .label{font-size:14px;margin-bottom:8px}
-  .input,.input.pw{height:50px;border-width:1.5px;border-radius:10px}
+  .brand-name{font-size:22px}
+  .form-wrap{position:static;width:min(100%,clamp(390px,27vw,480px));min-width:0;margin:auto 0;padding:10px 0}
+  .title{font-size:clamp(30px,3.3vw,42px);white-space:normal}
+  .subtitle{margin-top:9px;font-size:clamp(13px,1.4vw,16px);line-height:1.35;white-space:normal;text-wrap:balance}
+  .fields{margin-top:clamp(18px,3.8dvh,34px)}
+  .field + .field{margin-top:clamp(10px,2.2dvh,18px)}
+  .label{font-size:14px;margin-bottom:6px}
+  .input,.input.pw{height:clamp(42px,6dvh,50px);border-width:1.5px;border-radius:10px}
   .input:focus-within{box-shadow:0 0 0 3px rgba(123,79,242,.12)}
-  .input input{padding:0 14px;font-size:16px}
-  .input.pw input:not(.shown){font-size:26px;letter-spacing:2.5px;padding-left:12px;padding-bottom:3px}
-  .eye{right:5px}
+  .input input,.input.pw input.shown{font-size:16px;padding:0 14px}
+  .input.pw input:not(.shown){font-size:26px;letter-spacing:2.5px;padding-left:12px;padding-bottom:3px;padding-right:48px}
+  .eye{right:4px;width:40px;height:40px}
   .eye svg{width:19px;height:20px}
-  .forgot{font-size:14px;margin-top:4px;padding:6px 0}
-  .btn-primary{height:52px;margin-top:20px;padding-bottom:0;border-radius:12px;font-size:17px}
-  .divider{margin-top:24px;gap:14px;font-size:15px}
+  .forgot{margin-top:4px;padding:4px 0;font-size:13.5px}
+  .btn-primary{height:clamp(44px,6dvh,52px);margin-top:clamp(12px,2.4dvh,20px);padding-bottom:0;border-radius:11px;font-size:17px}
+  .divider{margin-top:clamp(12px,2.5dvh,20px);gap:13px;font-size:14px}
   .divider::before,.divider::after{height:1.5px;top:1px}
-  .btn-social{height:52px;gap:10px;padding-top:0;border-width:1.5px;border-radius:10px;font-size:16px}
-  .btn-social svg{width:20px;height:20px}
-  .btn-social.g svg{top:0}
-  .btn-social.g{margin-top:20px}
-  .btn-social.a{margin-top:12px;padding-left:2px}
-  .btn-social.a svg{width:18px;height:21px;top:-2px}
-  .signup{margin-top:24px;font-size:15px}
-  .signup a{text-decoration-thickness:1px;text-underline-offset:3px}
-  .foot{font-size:14px}
+  .btn-social{height:clamp(44px,6dvh,50px);gap:10px;padding-top:0;border-width:1.5px;border-radius:10px;font-size:15px}
+  .btn-social svg{width:20px;height:20px;top:0!important}
+  .btn-social.g{margin-top:clamp(10px,2dvh,18px)}
+  .btn-social.a{margin-top:8px;padding-left:2px}
+  .btn-social.a svg{width:18px;height:21px}
+  .signup{margin-top:clamp(12px,2.4dvh,20px);font-size:14.5px}
+  .foot{position:static;align-self:stretch;flex:none;font-size:13px;line-height:1.1}
+  .foot svg{width:17px;height:17px}
   .foot span{gap:6px}
-  .foot svg{width:16px;height:16px}
 
-  /* AI panel */
-  .panel{margin:0 10px 10px;min-height:calc(100svh - 10px);border-radius:18px;
-    padding:0 14px max(14px, env(safe-area-inset-bottom))}
-  .ask{font-size:clamp(24px, (100vw - 48px) / 10, 40px);letter-spacing:-.015em}
-  .panel-inner{width:100%;max-width:520px;margin:0 auto}
-  .chips{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:8px;width:100%;margin-top:20px}
-  .chips .chip{width:auto;min-width:0;height:42px;padding:0 10px 0 7px;gap:8px;border-width:1.5px;font-size:clamp(12px, 3.5vw, 14px)}
-  .chip i{width:28px;height:28px}
+  .panel{position:relative;inset:auto;min-width:0;height:calc(100% - 20px);margin:10px 10px 10px 0;border-radius:18px}
+  .panel-inner{left:18px;right:18px;bottom:clamp(20px,5dvh,46px)}
+  .ask{margin-right:0;font-size:clamp(24px,3vw,36px);line-height:1.1;white-space:normal;text-align:center}
+  .chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:min(100%,360px);margin:clamp(12px,2.2dvh,22px) 0 0}
+  .chip,.chip:nth-child(n){width:auto;min-width:0;height:38px;padding:0 7px;gap:6px;border-width:1.5px;font-size:12.5px}
+  .chip i{width:24px;height:24px}
   .chip i svg{width:15px;height:15px}
-  .prompt{height:auto;margin-top:18px;border-radius:22px;display:flex;flex-direction:column;padding:16px 14px 14px}
-  .prompt::before{padding:2px}
-  .prompt textarea{position:static;width:100%;height:auto;min-height:92px;padding:0 2px;font-size:16px}
-  .tools{position:static;margin-top:10px;flex-wrap:wrap;gap:10px 8px}
-  .tools .pill{width:auto;height:42px;padding:0 14px 0 12px;gap:8px;border-width:1.5px;font-size:14px}
-  .tools .pill.sq{width:42px}
-  .pill svg{width:18px;height:18px}
+  .prompt{width:min(100%,420px);height:clamp(185px,31dvh,270px);margin-top:clamp(16px,3.2dvh,30px);border-radius:23px}
+  .prompt textarea{left:20px;right:20px;top:18px;height:calc(100% - 92px);font-size:15px;line-height:1.35}
+  .tools{left:16px;right:16px;bottom:16px;gap:6px}
+  .pill,.pill:nth-child(n){width:auto;height:36px;padding:0 8px;gap:5px;border-width:1.5px;font-size:12px}
+  .pill svg{width:16px;height:16px}
+  .pill.sq{width:36px;padding:0}
   .pill.sq svg{width:20px;height:20px}
-  .spacer{min-width:16px}
-  .wave{width:18px;height:19px;margin:0 4px 0 auto}
-  .send{width:42px;height:42px}
-  .send svg{width:22px;height:22px}
+  .wave{display:none}
+  .send{width:36px;height:36px}
+  .send svg{width:20px;height:20px}
 }
+
+/* Short desktop windows use the same vertical rhythm as tablets. */
+@media (min-width:700px) and (max-height:680px){
+  .form-wrap{padding:0}
+  .subtitle{margin-top:6px}
+  .fields{margin-top:14px}
+  .field + .field{margin-top:8px}
+  .btn-primary{margin-top:10px}
+  .divider{margin-top:10px}
+  .btn-social.g{margin-top:8px}
+  .signup{margin-top:10px}
+}
+
+/* Wider laptops can keep the reference artwork's single chip row. */
+@media (min-width:1360px) and (max-width:1600px), (min-width:1360px) and (max-height:1000px){
+  .panel-inner{left:40px;right:40px}
+  .chips{grid-template-columns:repeat(4,minmax(0,1fr));width:min(100%,clamp(580px,35vw,700px))}
+  .chip,.chip:nth-child(n){font-size:12px}
+  .prompt{width:min(100%,clamp(580px,35vw,700px));height:clamp(220px,31dvh,300px)}
+}
+
+/* Phones: one focused login surface; social choices share a row. */
+@media (max-width:699px){
+  :root{--u:1px;--gutter:clamp(16px,5vw,28px)}
+  .screen{width:100%;height:100dvh;min-height:0;display:block;overflow:hidden}
+  .left{position:relative;inset:auto;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;align-items:center;padding:max(12px,env(safe-area-inset-top)) var(--gutter) max(12px,env(safe-area-inset-bottom))}
+  .brand{position:static;align-self:flex-start;gap:10px;flex:none}
+  .brand-mark{width:32px;height:32px;border-radius:8px}
+  .brand-mark svg{width:21px;height:21px}
+  .brand-name{font-size:21px;letter-spacing:-.1px}
+  .form-wrap{position:static;width:min(100%,440px);min-width:0;margin:auto 0;padding:8px 0}
+  .title{font-size:clamp(28px,8vw,40px);letter-spacing:-.02em;white-space:normal}
+  .subtitle{margin:8px auto 0;font-size:14px;line-height:1.35;white-space:normal;text-wrap:balance}
+  .fields{margin-top:clamp(12px,2.4dvh,24px)}
+  .field + .field{margin-top:clamp(10px,1.8dvh,16px)}
+  .label{font-size:13.5px;margin-bottom:6px}
+  .input,.input.pw{height:clamp(44px,6dvh,48px);border-width:1.5px;border-radius:10px}
+  .input:focus-within{box-shadow:0 0 0 3px rgba(123,79,242,.12)}
+  .input input,.input.pw input.shown{padding:0 14px;font-size:16px}
+  .input.pw input:not(.shown){font-size:26px;letter-spacing:2.5px;padding-left:12px;padding-bottom:3px;padding-right:48px}
+  .eye{right:2px;width:44px;height:44px}
+  .eye svg{width:19px;height:20px}
+  .forgot{margin-top:3px;padding:3px 0;font-size:13.5px}
+  .btn-primary{height:clamp(44px,6dvh,52px);margin-top:clamp(10px,2dvh,20px);padding-bottom:0;border-radius:11px;font-size:17px}
+  .divider{margin-top:clamp(12px,2dvh,24px);gap:12px;font-size:14px}
+  .divider::before,.divider::after{height:1.5px;top:1px}
+  .social-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:clamp(10px,1.8dvh,20px)}
+  .btn-social,.btn-social.g,.btn-social.a{width:100%;height:clamp(44px,6dvh,48px);margin:0;padding:0 6px;gap:7px;border-width:1.5px;border-radius:10px;font-size:14px;white-space:nowrap}
+  .btn-social svg,.btn-social.g svg,.btn-social.a svg{width:20px;height:20px;top:0}
+  .btn-social.a svg{width:17px;height:21px}
+  .social-prefix{display:none}
+  .signup{margin-top:clamp(12px,2dvh,24px);font-size:14px}
+  .signup a{text-decoration-thickness:1px;text-underline-offset:3px}
+  .foot{position:static;align-self:stretch;flex:none;font-size:12.5px;line-height:1.1}
+  .foot span{gap:5px}
+  .foot svg{width:15px;height:15px}
+  .panel{display:none}
+}
+
+/* Compact phones: preserve the full form without shrinking tap targets. */
+@media (max-width:699px) and (max-height:600px){
+  .brand-mark{width:29px;height:29px}
+  .brand-name{font-size:20px}
+  .form-wrap{padding:0}
+  .title{font-size:28px}
+  .subtitle{font-size:13px;line-height:1.25;margin-top:5px}
+  .fields{margin-top:10px}
+  .field + .field{margin-top:8px}
+  .label{margin-bottom:4px}
+  .input,.input.pw{height:44px}
+  .btn-primary{height:44px;margin-top:9px}
+  .divider{margin-top:10px}
+  .social-actions{margin-top:9px}
+  .btn-social,.btn-social.g,.btn-social.a{height:44px}
+  .signup{margin-top:10px}
+}
+
+/* Short landscape screens use the horizontal space for the full login. */
+@media (min-width:600px) and (max-height:580px){
+  :root{--u:1px}
+  .screen{display:block;width:100%;height:100dvh;min-height:0;overflow:hidden}
+  .left{position:relative;inset:auto;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;align-items:center;padding:10px clamp(18px,4vw,38px)}
+  .brand{position:static;align-self:flex-start;gap:8px;flex:none}
+  .brand-mark{width:28px;height:28px;border-radius:7px}
+  .brand-mark svg{width:19px;height:19px}
+  .brand-name{font-size:19px}
+  .form-wrap{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:'title divider' 'subtitle socials' 'form socials' 'form signup';column-gap:clamp(24px,5vw,64px);width:min(100%,920px);max-width:none;min-width:0;margin:auto 0;padding:0}
+  .title{grid-area:title;text-align:left;font-size:clamp(25px,3vw,32px);white-space:normal}
+  .subtitle{grid-area:subtitle;text-align:left;margin:4px 0 0;font-size:13px;line-height:1.2;white-space:normal}
+  .form-wrap form{grid-area:form}
+  .fields{margin-top:10px}
+  .field + .field{margin-top:8px}
+  .label{font-size:12.5px;margin-bottom:4px}
+  .input,.input.pw{height:43px;border-width:1.5px;border-radius:9px}
+  .input input,.input.pw input.shown{font-size:16px;padding:0 12px}
+  .input.pw input:not(.shown){font-size:24px;letter-spacing:2px;padding-left:12px;padding-right:46px}
+  .eye{right:2px;width:40px;height:40px}
+  .eye svg{width:19px;height:20px}
+  .forgot{margin-top:2px;padding:2px 0;font-size:12.5px}
+  .btn-primary{height:43px;margin-top:8px;padding:0;border-radius:9px;font-size:16px}
+  .divider{grid-area:divider;margin:0;align-self:center;font-size:14px}
+  .social-actions{grid-area:socials;display:flex;flex-direction:column;gap:8px;margin:12px 0 0}
+  .btn-social,.btn-social.g,.btn-social.a{width:100%;height:43px;margin:0;padding:0 8px;gap:8px;border-width:1.5px;border-radius:9px;font-size:14px}
+  .btn-social svg,.btn-social.g svg,.btn-social.a svg{width:19px;height:19px;top:0}
+  .social-prefix{display:inline}
+  .signup{grid-area:signup;margin:12px 0 0;text-align:left;font-size:13.5px}
+  .foot{position:static;align-self:stretch;flex:none;font-size:12px}
+  .foot span{gap:5px}
+  .foot svg{width:14px;height:14px}
+  .panel{display:none}
+}
+
+/* The keyboard or extreme zoom can reduce the viewport below the form's
+   physical minimum. Keep controls reachable without a visible scrollbar. */
+@media (max-height:440px) and (max-width:599px), (max-height:340px) and (max-width:1132px){
+  .left{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+  .left::-webkit-scrollbar{display:none}
+  .form-wrap{margin:8px 0}
+  .foot{margin-top:auto}
+}
+
+/* Keyboard users need a visible target on every action. */
+:where(button,a,textarea):focus-visible{outline:3px solid #a88bff;outline-offset:3px}
+.panel :where(button,textarea):focus-visible{outline-color:#fff}
 
 /* ---- touch devices: hover styles would stick after a tap, so the same
    feedback moves to :active; mouse users keep the desktop hover ---- */
@@ -351,14 +396,16 @@ svg{display:block}
 
       <div class="divider">Or Login With</div>
 
-      <button class="btn-social g" type="button">
-        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-        Continue with Google
-      </button>
-      <button class="btn-social a" type="button">
-        <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="#000" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
-        Continue with Apple
-      </button>
+      <div class="social-actions">
+        <button class="btn-social g" type="button" aria-label="Continue with Google">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          <span><span class="social-prefix">Continue with </span>Google</span>
+        </button>
+        <button class="btn-social a" type="button" aria-label="Continue with Apple">
+          <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="#000" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          <span><span class="social-prefix">Continue with </span>Apple</span>
+        </button>
+      </div>
 
       <p class="signup">Don’t have an account? <a href="#">Signup</a></p>
     </div>

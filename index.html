@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Voicelab Login</title>
 <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+<script>
+  // Set before first paint. With JavaScript disabled, the page stays visible.
+  if (window.matchMedia && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('entry-intro');
+  }
+</script>
 <style>
 @font-face{font-family:"Figtree";font-weight:500;font-display:block;src:url(assets/fonts/figtree-500.woff2) format("woff2")}
 @font-face{font-family:"Figtree";font-weight:600;font-display:block;src:url(assets/fonts/figtree-600.woff2) format("woff2")}
@@ -340,6 +346,42 @@ svg{display:block}
 :where(button,a,textarea):focus-visible{outline:3px solid #a88bff;outline-offset:3px}
 .panel :where(button,textarea):focus-visible{outline-color:#fff}
 
+/* One opening timeline. The blue panel background never animates. Each
+   animation uses backwards fill only, so the final frame is authored CSS. */
+@keyframes entry-rise{
+  from{opacity:0;transform:translate3d(0,var(--entry-offset,8px),0)}
+  to{opacity:1;transform:none}
+}
+@keyframes entry-type{
+  from{opacity:0;clip-path:inset(0 0 100% 0);transform:translate3d(0,12px,0)}
+  to{opacity:1;clip-path:inset(0);transform:none}
+}
+@keyframes entry-interface{
+  from{opacity:0;transform:translate3d(0,10px,0) scale(.988)}
+  to{opacity:1;transform:none}
+}
+@keyframes entry-quiet{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+  .entry-intro :is(.brand,.title,.subtitle,.fields,.forgot,.btn-primary,.divider,.social-actions,.signup,.foot,.ask,.chips,.prompt){
+    animation-timing-function:cubic-bezier(.22,1,.36,1);
+    animation-fill-mode:backwards;
+    animation-iteration-count:1;
+  }
+  .entry-intro .brand{--entry-offset:6px;animation-name:entry-rise;animation-duration:.52s;animation-delay:.02s}
+  .entry-intro .title{animation-name:entry-type;animation-duration:.72s;animation-delay:.16s}
+  .entry-intro .subtitle{--entry-offset:7px;animation-name:entry-rise;animation-duration:.50s;animation-delay:.38s}
+  .entry-intro .fields{--entry-offset:10px;animation-name:entry-rise;animation-duration:.60s;animation-delay:.49s}
+  .entry-intro .forgot{animation-name:entry-quiet;animation-duration:.38s;animation-delay:.65s}
+  .entry-intro .btn-primary{--entry-offset:6px;animation-name:entry-rise;animation-duration:.54s;animation-delay:.73s}
+  .entry-intro .divider{animation-name:entry-quiet;animation-duration:.40s;animation-delay:.84s}
+  .entry-intro .social-actions{--entry-offset:7px;animation-name:entry-rise;animation-duration:.52s;animation-delay:.91s}
+  .entry-intro .signup{animation-name:entry-quiet;animation-duration:.42s;animation-delay:1.10s}
+  .entry-intro .foot{animation-name:entry-quiet;animation-duration:.42s;animation-delay:1.20s}
+  .entry-intro .ask{--entry-offset:9px;animation-name:entry-rise;animation-duration:.65s;animation-delay:.70s}
+  .entry-intro .chips{--entry-offset:7px;animation-name:entry-rise;animation-duration:.52s;animation-delay:.94s}
+  .entry-intro .prompt{animation-name:entry-interface;animation-duration:.72s;animation-delay:1.05s}
+}
+
 /* ---- touch devices: hover styles would stick after a tap, so the same
    feedback moves to :active; mouse users keep the desktop hover ---- */
 @media (hover: none){
@@ -352,7 +394,7 @@ svg{display:block}
   .pill:active{background:rgba(255,255,255,.13)}
   .btn-social:active{background:#f3f3f5}
 }
-@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -441,5 +483,28 @@ svg{display:block}
     </div>
   </section>
 </main>
+<script>
+  // Finish on interaction or resize so the entrance never blocks the form or
+  // replays across layouts. Backwards fill makes failed cleanup harmless.
+  (() => {
+    const root = document.documentElement;
+    if (root.classList.contains('entry-intro')) {
+      let timeout;
+      const finish = () => {
+        root.classList.remove('entry-intro');
+        window.removeEventListener('pointerdown', finish);
+        window.removeEventListener('keydown', finish);
+        window.removeEventListener('resize', finish);
+        document.removeEventListener('visibilitychange', finish);
+        window.clearTimeout(timeout);
+      };
+      window.addEventListener('pointerdown', finish, {once:true});
+      window.addEventListener('keydown', finish, {once:true});
+      window.addEventListener('resize', finish, {once:true});
+      document.addEventListener('visibilitychange', finish, {once:true});
+      timeout = window.setTimeout(finish, 2050);
+    }
+  })();
+</script>
 </body>
 </html>
